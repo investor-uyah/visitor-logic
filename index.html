@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VisitorLogic — Visitor-aware websites without tracking</title>
+
+  <meta name="description" content="VisitorLogic is a lightweight runtime that adapts website copy based on visitor context — without cookies, tracking, or backend APIs.">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #12172a;
+      --text: #e6e8ef;
+      --muted: #9aa1b2;
+      --accent: #4f7cff;
+      --border: #1e2440;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 80px 20px;
+      max-width: 1100px;
+      margin: auto;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .cta {
+      margin-top: 32px;
+    }
+
+    .cta a {
+      background: var(--accent);
+      color: white;
+      padding: 14px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    section {
+      padding: 70px 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    section p {
+      color: var(--muted);
+      max-width: 800px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    pre {
+      background: #05070f;
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+      color: #cfd4ff;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #1b2140;
+      color: #aab2ff;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="badge">Phase-1 • No backend • No tracking • Built for Africa</span>
+  <h1>VisitorLogic</h1>
+  <p>
+    A lightweight runtime that adapts website copy based on visitor context —
+    without cookies, fingerprinting, or AI APIs.
+  </p>
+
+  <div class="cta">
+    <a href="#install">Get Started</a>
+  </div>
+</header>
+
+<section>
+  <h2>What VisitorLogic does</h2>
+  <p>
+    Most websites show the same message to every visitor.
+    VisitorLogic allows your site to respond differently based on
+    <strong>page type, audience, industry, region, and referrer</strong>
+    — all resolved locally in the browser.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Zero tracking</h3>
+      <p>No cookies. No user identity. No fingerprinting. Everything runs client-side.</p>
+    </div>
+    <div class="card">
+      <h3>Deterministic logic</h3>
+      <p>No AI hallucinations. Every headline is intentional and reviewable.</p>
+    </div>
+    <div class="card">
+      <h3>Fast by default</h3>
+      <p>No async blocking. No backend calls. No layout shift.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <p>
+    VisitorLogic resolves a <strong>segment key</strong> at runtime,
+    then injects copy into your page using safe data attributes.
+  </p>
+
+  <pre>
+page_type | audience | industry | region | referrer
+homepage  | teams    | fintech  | africa | search
+  </pre>
+</section>
+
+<section id="install">
+  <h2>Installation</h2>
+  <p>Drop this into your site — that’s it.</p>
+
+  <pre>
+&lt;!-- VisitorLogic Config --&gt;
+&lt;script&gt;
+  window.VisitorLogic_CONFIG = {
+    industry: "agriculture",
+    audience: "teams",
+    page_type: "homepage"
+  };
+&lt;/script&gt;
+
+&lt;!-- VisitorLogic Runtime --&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/yourname/visitorlogic/dist/visitorlogic.v1.js" defer&gt;&lt;/script&gt;
+  </pre>
+</section>
+
+<section>
+  <h2>Segment data</h2>
+  <p>
+    Segments live in a versioned JSON file.
+    No data is hidden. Everything is inspectable.
+  </p>
+
+  <pre>
+{
+  "homepage|teams|agriculture|africa|direct": {
+    "page_type": "homepage",
+    "audience": "teams",
+    "industry": "agriculture",
+    "region": "africa",
+    "referrer_type": "direct",
+    "headline": "Built for growing agricultural teams",
+    "subheadline": "Tools designed for real-world operations.",
+    "cta": "Learn more"
+  }
+}
+  </pre>
+</section>
+
+<section>
+  <h2>Wildcard resolution</h2>
+  <p>
+    If an exact match is not found, VisitorLogic gracefully falls back using
+    wildcards — never breaking your page.
+  </p>
+
+  <pre>
+homepage|teams|agriculture|africa|search
+homepage|teams|agriculture|africa|*
+homepage|*|agriculture|africa|*
+homepage|*|*|global|*
+default
+  </pre>
+</section>
+
+<section>
+  <h2>What this is not</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>❌ Not creepy</h3>
+      <p>No deanonymization. No company detection.</p>
+    </div>
+    <div class="card">
+      <h3>❌ Not AI-heavy</h3>
+      <p>No token costs. No LLM latency.</p>
+    </div>
+    <div class="card">
+      <h3>❌ Not fragile</h3>
+      <p>No runtime errors if a segment is missing.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>
+    VisitorLogic is open-source and designed for clarity, speed, and trust.
+  </p>
+  <p>
+    MIT / BSD-3 compatible • Built for modern web teams
+  </p>
+</footer>
+
+</body>
+</html>
