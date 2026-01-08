@@ -10,20 +10,28 @@
    =============================== */
 
 window.VisitorLogic_CONFIG = window.VisitorLogic_CONFIG || {
-  industry: "agriculture",     // agriculture | fintech | fashion | health | logistics | etc
-  audience: "teams",           // teams | founders | enterprises | individuals
-  region_focus: "africa",      // africa | global
-  brand_tone: "professional",  // professional | friendly | bold
-  page_type: "homepage"        // homepage | pricing | features | landing
+  industry: "agriculture",
+  audience: "teams",
+  region_focus: "africa",
+  brand_tone: "professional",
+  page_type: "homepage",
+  debug: false // 👈 optional, default off
 }
 
 const CONFIG = window.VisitorLogic_CONFIG
+const DEBUG = CONFIG.debug === true
+
+function log(...args) {
+  if (DEBUG) {
+    console.log("[VisitorLogic]", ...args)
+  }
+}
 
 /* ===============================
    2. SEGMENTS HOLDER
    =============================== */
 
-let SEGMENTS = {}
+let SEGMENTS = []
 
 /* ===============================
    3. VISITOR CONTEXT DETECTION
@@ -52,7 +60,7 @@ function detectRegion() {
    =============================== */
 
 function buildSegmentKeys(ctx) {
-  return [
+  const keys = [
     `${ctx.page}|${ctx.audience}|${ctx.industry}|${ctx.region}|${ctx.referrer}`,
     `${ctx.page}|${ctx.audience}|${ctx.industry}|${ctx.region}|*`,
     `${ctx.page}|${ctx.audience}|${ctx.industry}|global|*`,
@@ -60,6 +68,9 @@ function buildSegmentKeys(ctx) {
     `${ctx.page}|*|*|${ctx.region}|*`,
     "default"
   ]
+
+  log("Segment keys generated:", keys)
+  return keys
 }
 
 /* ===============================
@@ -67,17 +78,19 @@ function buildSegmentKeys(ctx) {
    =============================== */
 
 function resolveCopy(keys, segments) {
+  log("Resolving copy from segments:", segments)
+
   for (const key of keys) {
-    const match = segments.find(
-      s => s.segment_key === key
-    )
+    const match = segments.find(s => s.segment_key === key)
     if (match) {
+      log("Matched segment:", key, match)
       return { copy: match, key }
     }
   }
 
-  // fallback
   const fallback = segments.find(s => s.segment_key === "default") || null
+  log("No match found. Using fallback:", fallback)
+
   return { copy: fallback, key: "default" }
 }
 
@@ -86,15 +99,29 @@ function resolveCopy(keys, segments) {
    =============================== */
 
 function applyCopy(copy) {
-  if (!copy) return
+  if (!copy) {
+    log("No copy to apply")
+    return
+  }
 
   const h = document.querySelector("[data-vl-headline]")
   const s = document.querySelector("[data-vl-subheadline]")
   const c = document.querySelector("[data-vl-cta]")
 
-  if (h && copy.headline) h.textContent = copy.headline
-  if (s && copy.subheadline) s.textContent = copy.subheadline
-  if (c && copy.cta) c.textContent = copy.cta
+  if (h && copy.headline) {
+    h.textContent = copy.headline
+    log("Injected headline:", copy.headline)
+  }
+
+  if (s && copy.subheadline) {
+    s.textContent = copy.subheadline
+    log("Injected subheadline:", copy.subheadline)
+  }
+
+  if (c && copy.cta) {
+    c.textContent = copy.cta
+    log("Injected CTA:", copy.cta)
+  }
 }
 
 /* ===============================
@@ -107,6 +134,7 @@ function bootVisitorLogic() {
     const cached = sessionStorage.getItem(cacheKey)
 
     if (cached) {
+      log("Using cached copy")
       applyCopy(JSON.parse(cached))
       return
     }
@@ -116,20 +144,22 @@ function bootVisitorLogic() {
       audience: CONFIG.audience,
       page: CONFIG.page_type,
       region: detectRegion(),
-      referrer: detectReferrer()
+      referrer: detectReferrer(),
+      device: detectDevice()
     }
 
+    log("Context detected:", ctx)
+
     const keys = buildSegmentKeys(ctx)
-    const result = resolveCopy(keys)
+    const result = resolveCopy(keys, SEGMENTS)
 
     if (result.copy) {
       sessionStorage.setItem(cacheKey, JSON.stringify(result.copy))
       sessionStorage.setItem("VL_segment_key", result.key)
       applyCopy(result.copy)
+    } else {
+      log("No copy applied (null result)")
     }
-
-    // Optional debug
-    // console.log("VisitorLogic segment:", result.key)
 
   } catch (e) {
     console.error("VisitorLogic failed safely:", e)
@@ -140,13 +170,15 @@ function bootVisitorLogic() {
    8. SEGMENT FETCH & START
    =============================== */
 
-fetch("./segments.v1.json")
+fetch("https://cdn.jsdelivr.net/gh/investor-uyah/visitor-logic/dist/segments.v1.json")
   .then(r => r.json())
   .then(data => {
-    SEGMENTS = data || {}
+    SEGMENTS = Array.isArray(data) ? data : []
+    log("Segments loaded:", SEGMENTS.length)
     bootVisitorLogic()
   })
-  .catch(() => {
-    SEGMENTS = {}
+  .catch(err => {
+    log("Failed to load segments:", err)
+    SEGMENTS = []
     bootVisitorLogic()
   })
